@@ -77,15 +77,14 @@
 
   <!-- OneSignal SDK -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "YOUR_ONESIGNAL_APP_ID", // Replace with your App ID
-        notifyButton: { enable: true }
-      });
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "f5e45dbf-3aca-41cf-9491-414395a66cd5",
     });
-  </script>
+  });
+</script>
 </head>
 <body>
   <div class="container">
