@@ -64,8 +64,14 @@
     // ----------------- Register Service Worker -----------------
     async function registerServiceWorker() {
       if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.register('./sw.js'); // relative path for GitHub Pages
-        return registration;
+        try {
+          const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+          console.log('SW registered ✅', registration);
+          return registration;
+        } catch(err) {
+          console.error('SW registration failed ❌', err);
+          alert('Service Worker registration failed. Check console.');
+        }
       } else {
         alert('Service Worker not supported 😕');
       }
@@ -80,22 +86,21 @@
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
         });
+        console.log('Subscription:', subscription);
 
-        // Send subscription to backend
         const res = await fetch('https://hydration-hhjy.onrender.com/subscribe', {
           method: 'POST',
-          body: JSON.stringify(subscription),
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscription)
         });
 
-        if(res.ok) {
-          alert('Subscribed successfully! ✅');
-        } else {
-          alert('Subscription failed 😕');
-        }
+        const data = await res.json();
+        console.log('Backend response:', data);
+        alert('Subscribed successfully! ✅');
+
       } catch(err) {
-        console.error(err);
-        alert('Error subscribing. Check console.');
+        console.error('Subscription failed ❌', err);
+        alert('Subscription failed. Check console.');
       }
     }
 
@@ -115,11 +120,11 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title, message })
         });
-
         const data = await res.json();
         alert(data.message || 'Message sent! 🎉');
+
       } catch(err) {
-        console.error(err);
+        console.error('Error sending notification ❌', err);
         alert('Error sending message. Check console.');
       }
     }
@@ -127,7 +132,6 @@
     document.getElementById('subscribeBtn').addEventListener('click', subscribeUser);
     document.getElementById('sendBtn').addEventListener('click', sendNotification);
 
-    // ----------------- Utility -----------------
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
       const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
