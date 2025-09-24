@@ -1,136 +1,354 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hydration Reminder 💧</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #6dd5ed, #2193b0);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: #fff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder App</title>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    .container {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 40px;
-      text-align: center;
-      max-width: 400px;
-      width: 90%;
-      animation: fadeIn 1.5s ease forwards;
-    }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 15px;
-      animation: bounce 2s infinite;
-    }
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
 
-    p { font-size: 1.1rem; margin-bottom: 20px; }
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
 
-    input {
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      width: calc(50% - 10px);
-      margin: 5px;
-      text-align: center;
-    }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
 
-    button {
-      padding: 12px 25px;
-      margin: 10px 5px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      background: linear-gradient(45deg,#ff6b6b,#ff4757);
-      color: #fff;
-      font-weight: bold;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
 
-    button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
+        .content {
+            padding: 25px;
+        }
 
-    @keyframes fadeIn {
-      0% { opacity:0; transform: translateY(-20px);}
-      100% { opacity:1; transform: translateY(0);}
-    }
+        .notification-form {
+            margin-bottom: 30px;
+        }
 
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-10px); }
-      60% { transform: translateY(-5px); }
-    }
-  </style>
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-  <!-- OneSignal SDK -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "f5e45dbf-3aca-41cf-9491-414395a66cd5",
-    });
-  });
-</script>
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 2px rgba(79, 172, 254, 0.2);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .schedule-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .schedule-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+
+        .notification-status {
+            background-color: #e7f3ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .notification-status p {
+            margin-bottom: 10px;
+            color: #0066cc;
+        }
+
+        #notificationToggle {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #notificationToggle.off {
+            background-color: #f44336;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Hydration Reminder 💧</h1>
-    <p>Never forget to drink water! Get reminders every 2 hours.</p>
+    <div class="container">
+        <div class="header">
+            <h1>💧 Reminder App</h1>
+            <p>Stay hydrated with automatic reminders</p>
+        </div>
+        
+        <div class="content">
+            <div class="notification-form">
+                <h2>Send Manual Notification</h2>
+                <form id="notificationForm">
+                    <div class="form-group">
+                        <label for="title">Title:</label>
+                        <input type="text" id="title" placeholder="Enter notification title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <textarea id="message" placeholder="Enter notification message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn">Send Notification</button>
+                </form>
+            </div>
+            
+            <div id="statusMessage" class="status"></div>
+            
+            <div class="notification-status">
+                <p>Push Notifications: <span id="notificationState">Checking...</span></p>
+                <button id="notificationToggle" class="off">Enable Notifications</button>
+            </div>
+            
+            <div class="schedule-info">
+                <h3>Automatic Reminder Schedule</h3>
+                <div class="schedule-item">
+                    <span>Hydration Reminder</span>
+                    <span>Every 2 Hours</span>
+                </div>
+                <div class="schedule-item">
+                    <span>Next Reminder</span>
+                    <span id="nextReminder">Calculating...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by OneSignal • Backend running on port 3000</p>
+        </div>
+    </div>
 
-    <button id="subscribeBtn">Subscribe to Notifications</button>
-
-    <h3>Send Manual Message</h3>
-    <input type="text" id="title" placeholder="Title">
-    <input type="text" id="message" placeholder="Message">
-    <button id="sendBtn">Send</button>
-  </div>
-
-  <script>
-    // Subscribe Button
-    document.getElementById("subscribeBtn").addEventListener("click", async () => {
-      OneSignalDeferred.push(async function(OneSignal) {
-        try {
-          await OneSignal.registerForPushNotifications();
-          alert("Subscribed successfully! ✅");
-        } catch(err) {
-          console.error(err);
-          alert("Subscription failed. Check console.");
-        }
-      });
-    });
-
-    // Manual Notification
-    document.getElementById("sendBtn").addEventListener("click", async () => {
-      const title = document.getElementById("title").value;
-      const message = document.getElementById("message").value;
-      if(!title || !message){ alert("Enter both title and message"); return; }
-
-      try {
-        await fetch("https://hydration-hhjy.onrender.com/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, message })
+    <script>
+        // OneSignal initialization
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "f5e45dbf-3aca-41cf-9491-414395a66cd5",
+                allowLocalhostAsSecureOrigin: true,
+            });
+            
+            // Check initial subscription state
+            const isSubscribed = await OneSignal.User.pushSubscription.optedIn;
+            updateNotificationState(isSubscribed);
+            
+            // Listen for subscription changes
+            OneSignal.User.pushSubscription.addEventListener('change', (currentSubscription) => {
+                updateNotificationState(currentSubscription.optedIn);
+            });
         });
-        alert("Message sent! 🎉");
-      } catch(err) {
-        console.error(err);
-        alert("Failed to send notification");
-      }
-    });
-  </script>
+
+        // Update notification state UI
+        function updateNotificationState(isSubscribed) {
+            const stateElement = document.getElementById('notificationState');
+            const toggleButton = document.getElementById('notificationToggle');
+            
+            if (isSubscribed) {
+                stateElement.textContent = 'Enabled';
+                toggleButton.textContent = 'Disable Notifications';
+                toggleButton.classList.remove('off');
+            } else {
+                stateElement.textContent = 'Disabled';
+                toggleButton.textContent = 'Enable Notifications';
+                toggleButton.classList.add('off');
+            }
+        }
+
+        // Toggle notification subscription
+        document.getElementById('notificationToggle').addEventListener('click', async function() {
+            const OneSignal = window.OneSignal;
+            if (!OneSignal) return;
+            
+            const isSubscribed = await OneSignal.User.pushSubscription.optedIn;
+            
+            if (isSubscribed) {
+                await OneSignal.User.pushSubscription.optOut();
+            } else {
+                await OneSignal.User.pushSubscription.optIn();
+            }
+        });
+
+        // Calculate next reminder time
+        function calculateNextReminder() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const nextReminderHour = currentHour + (2 - (currentHour % 2));
+            
+            let nextReminder = new Date();
+            nextReminder.setHours(nextReminderHour, 0, 0, 0);
+            
+            // If the next reminder is in the past (shouldn't happen with our calculation), add 2 hours
+            if (nextReminder <= now) {
+                nextReminder.setHours(nextReminder.getHours() + 2);
+            }
+            
+            return nextReminder.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Update next reminder time
+        document.getElementById('nextReminder').textContent = calculateNextReminder();
+
+        // Form submission handler
+        document.getElementById('notificationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const message = document.getElementById('message').value;
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Clear previous status
+            statusMessage.style.display = 'none';
+            statusMessage.className = 'status';
+            
+            try {
+                // Send request to backend
+                const response = await fetch('/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ title, message })
+                });
+                
+                if (response.ok) {
+                    statusMessage.textContent = 'Notification sent successfully!';
+                    statusMessage.classList.add('success');
+                    statusMessage.style.display = 'block';
+                    
+                    // Clear form
+                    document.getElementById('notificationForm').reset();
+                } else {
+                    throw new Error('Failed to send notification');
+                }
+            } catch (error) {
+                statusMessage.textContent = 'Error sending notification. Please try again.';
+                statusMessage.classList.add('error');
+                statusMessage.style.display = 'block';
+                console.error('Error:', error);
+            }
+        });
+
+        // Update next reminder time every minute
+        setInterval(() => {
+            document.getElementById('nextReminder').textContent = calculateNextReminder();
+        }, 60000);
+    </script>
 </body>
 </html>
