@@ -59,12 +59,12 @@
   </div>
 
   <script>
-    const publicVapidKey = 'BHQR49iAiBm24D6Z8zTbb2LpyUtlkOiBnQvAkzor2VRnTPxcAyxv0An'; // Same as backend env
+    const publicVapidKey = 'BHQR49iAiBm24D6Z8zTbb2LpyUtlkOiBnQvAkzor2VRnTPxcAyxv0An';
 
     // ----------------- Register Service Worker -----------------
     async function registerServiceWorker() {
       if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.register('/sw.js');
+        const registration = await navigator.serviceWorker.register('./sw.js'); // relative path for GitHub Pages
         return registration;
       } else {
         alert('Service Worker not supported 😕');
@@ -73,19 +73,30 @@
 
     // ----------------- Subscribe -----------------
     async function subscribeUser() {
-      const registration = await registerServiceWorker();
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-      });
+      try {
+        const registration = await registerServiceWorker();
 
-      await fetch('https://hydration-hhjy.onrender.com/subscribe', {
-        method: 'POST',
-        body: JSON.stringify(subscription),
-        headers: { 'Content-Type': 'application/json' }
-      });
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+        });
 
-      alert('Subscribed successfully! ✅');
+        // Send subscription to backend
+        const res = await fetch('https://hydration-hhjy.onrender.com/subscribe', {
+          method: 'POST',
+          body: JSON.stringify(subscription),
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if(res.ok) {
+          alert('Subscribed successfully! ✅');
+        } else {
+          alert('Subscription failed 😕');
+        }
+      } catch(err) {
+        console.error(err);
+        alert('Error subscribing. Check console.');
+      }
     }
 
     // ----------------- Manual Notification -----------------
@@ -98,13 +109,19 @@
         return;
       }
 
-      await fetch('https://hydration-hhjy.onrender.com/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, message })
-      });
+      try {
+        const res = await fetch('https://hydration-hhjy.onrender.com/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, message })
+        });
 
-      alert('Message sent! 🎉');
+        const data = await res.json();
+        alert(data.message || 'Message sent! 🎉');
+      } catch(err) {
+        console.error(err);
+        alert('Error sending message. Check console.');
+      }
     }
 
     document.getElementById('subscribeBtn').addEventListener('click', subscribeUser);
