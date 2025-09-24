@@ -6,7 +6,7 @@
   <title>Hydration Reminder</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -17,12 +17,13 @@
       color: #fff;
       text-align: center;
     }
-    button {
-      padding: 12px 25px;
-      font-size: 16px;
-      margin: 10px;
-      border: none;
+    button, input {
+      padding: 12px 20px;
+      margin: 5px;
       border-radius: 8px;
+      border: none;
+    }
+    button {
       cursor: pointer;
       background-color: #ff6b6b;
       color: #fff;
@@ -32,10 +33,6 @@
       background-color: #ff4757;
     }
     input {
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      margin: 5px;
       width: 200px;
       text-align: center;
     }
@@ -45,6 +42,18 @@
       border-radius: 15px;
     }
   </style>
+
+  <!-- OneSignal SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "YOUR_ONESIGNAL_APP_ID", // Replace with your App ID
+        notifyButton: { enable: true }
+      });
+    });
+  </script>
 </head>
 <body>
   <div class="container">
@@ -59,85 +68,37 @@
   </div>
 
   <script>
-    const publicVapidKey = 'BHQR49iAiBm24D6Z8zTbb2LpyUtlkOiBnQvAkzor2VRnTPxcAyxv0An';
-
-    // ----------------- Register Service Worker -----------------
-    async function registerServiceWorker() {
-      if ('serviceWorker' in navigator) {
+    // Subscribe Button
+    document.getElementById("subscribeBtn").addEventListener("click", async () => {
+      OneSignalDeferred.push(async function(OneSignal) {
         try {
-          const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-          console.log('SW registered ✅', registration);
-          return registration;
+          await OneSignal.registerForPushNotifications();
+          alert("Subscribed successfully! ✅");
         } catch(err) {
-          console.error('SW registration failed ❌', err);
-          alert('Service Worker registration failed. Check console.');
+          console.error(err);
+          alert("Subscription failed. Check console.");
         }
-      } else {
-        alert('Service Worker not supported 😕');
-      }
-    }
+      });
+    });
 
-    // ----------------- Subscribe -----------------
-    async function subscribeUser() {
-      try {
-        const registration = await registerServiceWorker();
-
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-        });
-        console.log('Subscription:', subscription);
-
-        const res = await fetch('https://hydration-hhjy.onrender.com/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(subscription)
-        });
-
-        const data = await res.json();
-        console.log('Backend response:', data);
-        alert('Subscribed successfully! ✅');
-
-      } catch(err) {
-        console.error('Subscription failed ❌', err);
-        alert('Subscription failed. Check console.');
-      }
-    }
-
-    // ----------------- Manual Notification -----------------
-    async function sendNotification() {
-      const title = document.getElementById('title').value;
-      const message = document.getElementById('message').value;
-
-      if(!title || !message) {
-        alert('Please enter title and message');
-        return;
-      }
+    // Manual Notification
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const title = document.getElementById("title").value;
+      const message = document.getElementById("message").value;
+      if(!title || !message){ alert("Enter both title and message"); return; }
 
       try {
-        const res = await fetch('https://hydration-hhjy.onrender.com/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch("https://hydration-hhjy.onrender.com/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ title, message })
         });
-        const data = await res.json();
-        alert(data.message || 'Message sent! 🎉');
-
+        alert("Message sent! 🎉");
       } catch(err) {
-        console.error('Error sending notification ❌', err);
-        alert('Error sending message. Check console.');
+        console.error(err);
+        alert("Failed to send notification");
       }
-    }
-
-    document.getElementById('subscribeBtn').addEventListener('click', subscribeUser);
-    document.getElementById('sendBtn').addEventListener('click', sendNotification);
-
-    function urlBase64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = window.atob(base64);
-      return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
-    }
+    });
   </script>
 </body>
 </html>
