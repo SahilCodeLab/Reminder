@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Notification</title>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({ appId: "f5e45dbf-3aca-41cf-9491-414395a66cd5" });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("sendBtn").addEventListener("click", async () => {
+          const title = document.getElementById("title").value;
+          const message = document.getElementById("message").value;
+
+          if(!title || !message){
+            alert("Please enter title and message!");
+            return;
+          }
+
+          await OneSignal.sendSelfNotification(
+            title,
+            message,
+            "https://hydration-hhjy.onrender.com"
+          );
+
+          alert("Notification sent! 💧");
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Manual Notification 💧</h1>
+
+  <input type="text" id="title" placeholder="Enter title">
+  <br><br>
+  <input type="text" id="message" placeholder="Enter message">
+  <br><br>
+  <button id="sendBtn">Send Notification</button>
+  <button onclick="location.href='index.html'">Back</button>
+</body>
+</html>
